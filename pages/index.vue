@@ -29,9 +29,9 @@
             <div>
               <div class="claim_container">
                 <div class="reward_title">Claimable Balance</div>
-                <div class="reward_balance">0.1032 ETH</div>
+                <div class="reward_balance">{{ Number(claimBalance).toFixed(3) }} ETH</div>
                 <div class="reward_button_container">
-                  <button @click="getBalance" type="button" class="claim_button">
+                  <button @click="getBalance" type="button" class="claim_button" v-if="claimBalance > 0">
                     Claim
                   </button>
                 </div>
@@ -68,7 +68,8 @@ export default {
       provider: null,
       balance: 0,
       chainId: '0x5',
-      wrongNetwork: false
+      wrongNetwork: false,
+      claimBalance: 0.15293394483
     }
   },
   methods: {
