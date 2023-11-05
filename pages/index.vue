@@ -6,32 +6,35 @@
       <div class="etherscan_link"><a href="https://etherscan.io/address/0xA422342342342342n23422342356456n59" target="_blank">https://etherscan.io/address/0xA422342342342342n23422342356456n59</a></div>
     </div>
     <div class="main_content">
-      <div class="inner_content">
-        <div v-if="!loading">
-          <div v-if="!hasMetamask" class="no_metamask">
-            You need Metamask to use this app
-          </div>
-          
-          <div v-else>
-            <div class="status_label">Your address</div>
-            <div class="black_box">{{ address }}</div>
-            <div class="status_label">Your ETH balance</div>
-            <div class="black_box">{{ Number(balance).toFixed(2) }} ETH</div>
-          </div>
-          
-          <div v-if="!address && !loading">
-            <button @click="connect" type="button" v-if="hasMetamask">
-              Connect Metamask
-            </button>
-          </div>
-          <div v-else>
-            <div class="claim_container">
-              <div class="reward_title">Claimable Balance</div>
-              <div class="reward_balance">0.1032 ETH</div>
-              <div class="reward_button_container">
-                <button @click="getBalance" type="button" class="claim_button">
-                  Claim
-                </button>
+      <div class="inner_content" v-if="!loading">
+        
+        <div class="alert_container">
+          <div v-if="!hasMetamask" class="alert"><img src="~assets/images/alert.svg" /> You need Metamask to use this app</div>
+          <div v-else-if="wrongNetwork" class="alert"><img src="~assets/images/alert.svg" /> You need to use Goerli network</div>
+        </div>
+
+        <button @click="connect" type="button" class="connect_button" v-if="hasMetamask && !wrongNetwork && !address">
+          Connect Metamask
+        </button>
+
+        <div v-if="!wrongNetwork && hasMetamask && address">
+          <div>
+            <div>
+              <div class="status_label">Your address</div>
+              <div class="black_box">{{ address }}</div>
+              <div class="status_label">Your ETH balance</div>
+              <div class="black_box">{{ Number(balance).toFixed(2) }} ETH</div>
+            </div>
+            
+            <div>
+              <div class="claim_container">
+                <div class="reward_title">Claimable Balance</div>
+                <div class="reward_balance">0.1032 ETH</div>
+                <div class="reward_button_container">
+                  <button @click="getBalance" type="button" class="claim_button">
+                    Claim
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -63,7 +66,9 @@ export default {
       hasMetamask: false,
       address: null,
       provider: null,
-      balance: 0
+      balance: 0,
+      chainId: '0x5',
+      wrongNetwork: false
     }
   },
   methods: {
@@ -85,7 +90,16 @@ export default {
       // const infura_provider = new ethers.providers.JsonRpcProvider(`https://goerli.infura.io/v3/{this.$config.API_BASE_URL}`)
       // const balance = await infura_provider.getBalance(this.address)
     },
-    didConnect() {
+    async didAccountChange() {
+      this.isConnected()
+    },
+    async didNetworkChange() {
+      const chainId = await window.ethereum.request({method: 'eth_chainId'})
+      if (chainId !== this.chainId) {
+        this.wrongNetwork = true
+        return
+      }
+      this.wrongNetwork = false
       this.isConnected()
     }
   },
@@ -93,10 +107,15 @@ export default {
     if (process.client && window.ethereum) {
       this.hasMetamask = true
       this.provider = new ethers.providers.Web3Provider(window.ethereum)
+      this.didNetworkChange()
       this.isConnected()
 
       window.ethereum.on("accountsChanged", (accounts) => {
-        this.didConnect()
+        this.didAccountChange()
+      })
+
+      window.ethereum.on("networkChanged", (accounts) => {
+        this.didNetworkChange()
       })
     }
 
@@ -163,6 +182,46 @@ $link-color: #979797;
   margin-bottom: 10px;
 }
 
+.alert_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  .alert {
+    background-color: #bcbcbc;
+    color: black;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 15px;
+    width: 50%;
+    border-radius: 10px;
+    border: none;
+    text-align: center;
+
+    img {
+      width: 20px;
+      vertical-align: middle;
+      position: relative;
+      bottom: 1px;
+      margin-right: 5px;
+    }
+  }
+}
+
+
+.connect_button {
+  background-color: $secondary-color;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  padding: 15px;
+  width: 100%;
+  box-shadow: none;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
 .claim_button {
   background-color: $secondary-color;
   color: white;
@@ -173,6 +232,7 @@ $link-color: #979797;
   box-shadow: none;
   border-radius: 10px;
   border: none;
+  cursor: pointer;
 }
 
 .claim_container {
