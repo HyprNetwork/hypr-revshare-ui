@@ -31,7 +31,7 @@
                 <div class="reward_title">Claimable Balance</div>
                 <div class="reward_balance">{{ Number(claimBalance).toFixed(3) }} ETH</div>
                 <div class="reward_button_container">
-                  <button @click="getBalance" type="button" class="claim_button" v-if="claimBalance > 0">
+                  <button @click="doClaim" type="button" class="claim_button" v-if="claimBalance > 0">
                     Claim
                   </button>
                 </div>
@@ -52,12 +52,7 @@
 
 <script>
 import { ethers } from 'ethers'
-
-if (process.client && window.ethereum) {
-  window.ethereum.on('connect', () => {
-    console.log("Metamask connected")
-  })
-}
+import ERC20 from '../abis/ERC20.json'
 
 export default {
   data() {
@@ -65,7 +60,6 @@ export default {
       loading: true,
       hasMetamask: false,
       address: null,
-      provider: null,
       balance: 0,
       chainId: '0x5',
       wrongNetwork: false,
@@ -81,15 +75,19 @@ export default {
       }
     },
     async connect() {
-      await this.provider.send("eth_requestAccounts", []);
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      await provider.send("eth_requestAccounts", []);
     },
     async getBalance() {
       const balance = await ethereum.request({method: 'eth_getBalance', params: [this.address, "latest"]})
       this.balance = ethers.utils.formatEther(balance)
     },
-    async contract() {
-      // const infura_provider = new ethers.providers.JsonRpcProvider(`https://goerli.infura.io/v3/{this.$config.API_BASE_URL}`)
-      // const balance = await infura_provider.getBalance(this.address)
+    async doClaim() {
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const signer = provider.getSigner()
+      const USDTContract = new ethers.Contract('0x4f7a67464b5976d7547c860109e4432d50afb38e', ERC20, signer)
+      const sup = await USDTContract.totalSupply()
+      console.log(Number(sup))
     },
     async didAccountChange() {
       this.isConnected()
@@ -107,7 +105,6 @@ export default {
   mounted() {
     if (process.client && window.ethereum) {
       this.hasMetamask = true
-      this.provider = new ethers.providers.Web3Provider(window.ethereum)
       this.didNetworkChange()
       this.isConnected()
 
