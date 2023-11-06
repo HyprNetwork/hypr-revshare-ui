@@ -9,11 +9,6 @@ export default defineNuxtConfig({
     }
   },
   devtools: { enabled: true },
-  runtimeConfig: {
-    public: {
-      RPC_KEY: process.env.RPC_KEY,
-    },
-  },
   modules: [
     'nuxt-icon',
   ],

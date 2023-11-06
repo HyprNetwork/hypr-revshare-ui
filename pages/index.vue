@@ -10,7 +10,7 @@
         
         <div class="alert_container">
           <div v-if="!hasMetamask" class="alert"><img src="~assets/images/alert.svg" /> You need Metamask to use this app</div>
-          <div v-else-if="wrongNetwork" class="alert"><img src="~assets/images/alert.svg" /> You need to use Goerli network</div>
+          <div v-else-if="wrongNetwork" class="alert"><img src="~assets/images/alert.svg" /> You need to use the {{ networkName }} network</div>
         </div>
 
         <button @click="connect" type="button" class="connect_button" v-if="hasMetamask && !wrongNetwork && !address">
@@ -61,7 +61,8 @@ export default {
       hasMetamask: false,
       address: null,
       balance: 0,
-      chainId: '0x5',
+      chainId: 60005,
+      networkName: 'Hypr Testnet',
       wrongNetwork: false,
       claimBalance: 0.15293394483
     }
@@ -85,7 +86,7 @@ export default {
     async doClaim() {
       const provider = new ethers.providers.Web3Provider(window.ethereum)
       const signer = provider.getSigner()
-      const USDTContract = new ethers.Contract('0x4f7a67464b5976d7547c860109e4432d50afb38e', ERC20, signer)
+      const USDTContract = new ethers.Contract('0x4BC17E401158512AcE512E92592dc270466a7328', ERC20, signer)
       const sup = await USDTContract.totalSupply()
       console.log(Number(sup))
     },
@@ -94,7 +95,7 @@ export default {
     },
     async didNetworkChange() {
       const chainId = await window.ethereum.request({method: 'eth_chainId'})
-      if (chainId !== this.chainId) {
+      if (Number(chainId) !== Number(this.chainId)) {
         this.wrongNetwork = true
         return
       }
