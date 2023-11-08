@@ -13,9 +13,11 @@
           <div v-else-if="wrongNetwork" class="alert"><img src="~assets/images/alert.svg" /> You need to use the {{ networkName }} network</div>
         </div>
 
-        <button @click="connect" type="button" class="connect_button" v-if="hasMetamask && !wrongNetwork && !address">
-          Connect Metamask
-        </button>
+        <div class="connect_button_container" v-if="hasMetamask && !wrongNetwork && !address">
+          <button @click="connect" type="button" class="connect_button">
+            <img src="~assets/images/metamask.svg" width="30" />Connect Metamask
+          </button>
+        </div>
 
         <div v-if="!wrongNetwork && hasMetamask && address">
           <div>
@@ -192,10 +194,11 @@ $link-color: #979797;
     font-size: 18px;
     font-weight: 500;
     padding: 15px;
-    width: 50%;
+    width: 70%;
     border-radius: 10px;
     border: none;
     text-align: center;
+    margin-top: 200px;
 
     img {
       width: 20px;
@@ -207,19 +210,37 @@ $link-color: #979797;
   }
 }
 
-
+.connect_button_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 200px;
+}
 .connect_button {
   background-color: $secondary-color;
   color: white;
   font-size: 18px;
   font-weight: 500;
   padding: 15px;
-  width: 100%;
+  width: 50%;
   box-shadow: none;
   border-radius: 10px;
   border: none;
   cursor: pointer;
+
+  img {
+    width: 30px;
+    vertical-align: middle;
+    position: relative;
+    bottom: 2px;
+    margin-right: 10px;
+  }
 }
+
+.connect_button:hover {
+    opacity: 0.8;
+  }
 
 .claim_button {
   background-color: $secondary-color;
